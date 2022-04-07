@@ -1,0 +1,2 @@
+"0","#normalize Y"
+"0","data_covid_IHSG$CloseY<-(log(data_covid_IHSG$Close))"

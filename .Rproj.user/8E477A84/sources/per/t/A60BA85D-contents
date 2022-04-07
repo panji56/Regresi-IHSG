@@ -1,0 +1,157 @@
+---
+title: "Ridge Regression"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(lmridge)
+library(lmtest)
+library(regclass)
+```
+```{r}
+#loading data
+strfile="E:\\xampp\\htdocs\\ANN COVID-19\\ALL_FINAL.csv"
+data_covid_IHSG=read.csv(file = strfile)
+```
+
+```{r}
+RidgeFM<-Close~.-Date-total_boosters-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality
+```
+
+```{r}
+#iterative of K's
+Kopt=seq(0.0,1.0,0.005)
+```
+
+```{r}
+RidgeFit<-lmridge(RidgeFM,data_covid_IHSG,K= Kopt)
+```
+
+```{r}
+lmridge::kest(RidgeFit)
+```
+
+```{r}
+RidgeFit<-lmridge(RidgeFM,data_covid_IHSG,K= 0.16733)
+```
+
+```{r}
+summary(RidgeFit)
+```
+```{r}
+#assumption check
+
+lmtest::bptest(RidgeFit)
+lmtest::gqtest(RidgeFit)
+lmtest::hmctest(RidgeFit)
+
+lmtest::dwtest(RidgeFit)
+lmtest::bgtest(RidgeFit)
+```
+```{r}
+vif(RidgeFit)
+```
+
+```{r}
+Ridgeauto=dwtest(RidgeFit)
+pRidge=(1-(Ridgeauto$statistic/2))
+bptest(RidgeFit)
+```
+
+
+
+```{r}
+Y_var<-data_covid_IHSG$Close
+X_var<-subset(data_covid_IHSG,select=-c(Date,total_boosters,Close))
+```
+
+```{r}
+RidgeFMIt<-Close~.-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality
+```
+
+
+```{r}
+#remove auto-correlation
+#iter=1
+
+Y_var<-Y_var[2:length(Y_var)]-(pRidge*Y_var[1:length(Y_var)-1])
+X_var<-X_var[2:nrow(X_var),]-(pRidge*X_var[1:nrow(X_var)-1,])
+data_transform=data.frame("Close"=Y_var,X_var)
+
+RidgeFitIt<-lmridge(RidgeFMIt,data_transform,K= 0.16733)
+RidgeautoIt=dwtest(RidgeFitIt)
+pRidge=(1-(RidgeautoIt$statistic/2))
+RidgeautoIt
+
+#iter=2
+
+Y_var<-Y_var[2:length(Y_var)]-(pRidge*Y_var[1:length(Y_var)-1])
+X_var<-X_var[2:nrow(X_var),]-(pRidge*X_var[1:nrow(X_var)-1,])
+data_transform=data.frame("Close"=Y_var,X_var)
+
+RidgeFitIt<-lmridge(RidgeFMIt,data_transform,K= 0.16733)
+RidgeautoIt=dwtest(RidgeFitIt)
+pRidge=(1-(RidgeautoIt$statistic/2))
+RidgeautoIt
+```
+
+```{r}
+vif.lmridge(RidgeFitIt)
+```
+
+
+```{r}
+summary(RidgeFitIt)
+sqrt(mean(residuals.lmridge(RidgeFitIt)^2))
+```
+
+```{r}
+#assumption check
+
+lmtest::bptest(RidgeFitIt)
+lmtest::gqtest(RidgeFitIt)
+lmtest::hmctest(RidgeFitIt)
+
+lmtest::dwtest(RidgeFitIt)
+lmtest::bgtest(RidgeFitIt)
+```
+
+```{r}
+RidgeFMIt<-Close~.-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality-new_cases-new_deaths-new_tests-total_vaccinations
+```
+
+```{r}
+RidgeFitIt<-lmridge(RidgeFMIt,data_transform,K= 0.16733)
+```
+
+```{r}
+summary(RidgeFitIt)
+sqrt(mean(residuals.lmridge(RidgeFitIt)^2))
+```
+
+```{r}
+#assumption check
+
+lmtest::bptest(RidgeFitIt)
+lmtest::gqtest(RidgeFitIt)
+lmtest::hmctest(RidgeFitIt)
+
+lmtest::dwtest(RidgeFitIt)
+lmtest::bgtest(RidgeFitIt)
+```
+```{r}
+vif.lmridge(RidgeFitIt)
+```
+

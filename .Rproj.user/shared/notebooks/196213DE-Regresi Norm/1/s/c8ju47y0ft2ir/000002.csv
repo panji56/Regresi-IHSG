@@ -1,0 +1,2 @@
+"0","#formula and regression"
+"0","linearmodel<-lm(LMfom,data = data_covid_IHSG)"

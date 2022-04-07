@@ -1,0 +1,66 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library(nlme)
+```
+
+```{r}
+#normalize Y
+data_covid_IHSG$CloseY<-(log(data_covid_IHSG$Close))
+```
+
+
+```{r}
+GLSform=Close~.-Date-total_boosters-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_effectively_vaccinated-new_tests-cumulative_all_fully_vaccinated-cumulative_all_vaccinated-infection_fatality-infection_detection-CloseY
+```
+
+```{r}
+GLSModel=gls(GLSform,data = data_covid_IHSG,correlation = corAR1(p))
+```
+
+```{r}
+summary(GLSModel)
+sqrt(mean(residuals.lm(GLSModel)^2))
+```
+
+```{r}
+#assumption check, in GLS allow high variance and autocorrelation
+print(shapiro.test(residuals.lm(GLSModel)))
+```
+
+```{r}
+VIF(GLSModel)
+```
+
+
+```{r}
+plot(GLSModel)
+```
+

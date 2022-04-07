@@ -1,0 +1,49 @@
+---
+title: "Robust"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(robust)
+library(lmtest)
+library(regclass)
+```
+
+```{r}
+#loading data
+strfile="E:\\xampp\\htdocs\\ANN COVID-19\\ALL_FINAL.csv"
+data_covid_IHSG=read.csv(file = strfile)
+```
+
+
+```{r}
+RobFM<-Close~.-Date-total_boosters-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality-new_tests
+```
+
+```{r}
+RobModel<-lmRob(RobFM,data = data_covid_IHSG)
+```
+
+```{r}
+summary(RobModel)
+RobModel$robust.control
+```
+```{r}
+VIF(RobModel)
+```
+```{r}
+plot(RobModel)
+```
+

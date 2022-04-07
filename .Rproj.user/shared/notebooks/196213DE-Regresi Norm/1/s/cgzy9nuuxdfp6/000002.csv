@@ -1,0 +1,2 @@
+"0","Y_varlm<-data_covid_IHSG$Close"
+"0","X_varlm<-subset(data_covid_IHSG,select=-c(Date,CloseY,total_boosters,Close))"

@@ -1,0 +1,3 @@
+"0","#loading data"
+"0","strfile=""E:\\xampp\\htdocs\\ANN COVID-19\\ALL_FINAL.csv"""
+"0","data_covid_IHSG=read.csv(file = strfile)"

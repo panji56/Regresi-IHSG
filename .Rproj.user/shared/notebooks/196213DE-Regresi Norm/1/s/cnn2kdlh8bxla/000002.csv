@@ -1,0 +1,2 @@
+"0","lmauto=dwtest(linearmodel)"
+"0","p=(1-(lmauto$statistic/2))"

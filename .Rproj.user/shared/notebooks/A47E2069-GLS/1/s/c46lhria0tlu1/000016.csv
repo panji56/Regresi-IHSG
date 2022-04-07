@@ -1,0 +1,1 @@
+"0","GLSModel=gls(GLSform,data = data_covid_IHSG,correlation = corAR1(p))"

@@ -1,0 +1,1 @@
+"0","GLMmodel=glm(GLMfm,data=data_covid_IHSG,family = ""quasipoisson"")"

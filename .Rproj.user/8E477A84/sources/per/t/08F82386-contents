@@ -1,0 +1,167 @@
+---
+title: "Regresi Linear"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+#read library
+library(lmtest)
+library(regclass)
+library(olsrr)
+library(skedastic)
+```
+
+
+```{r}
+#loading data
+strfile="E:\\xampp\\htdocs\\ANN COVID-19\\ALL_FINAL.csv"
+data_covid_IHSG=read.csv(file = strfile)
+```
+
+```{r}
+#cleaning data
+head(data_covid_IHSG)
+```
+
+```{r}
+shapiro.test(data_covid_IHSG$Close)
+plot(data_covid_IHSG$Close)
+hist(data_covid_IHSG$Close)
+boxplot(data_covid_IHSG$Close)
+```
+
+
+```{r}
+LMfom=Close~.-Date-total_boosters-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality-new_tests
+```
+
+
+```{r}
+#formula and regression
+linearmodel<-lm(LMfom,data = data_covid_IHSG)
+```
+
+```{r}
+#result
+summary(linearmodel)
+sqrt(mean(residuals.lm(linearmodel)^2))
+```
+
+```{r}
+#assumption check
+ols_test_normality(linearmodel)
+
+lmtest::bptest(linearmodel)
+lmtest::gqtest(linearmodel)
+lmtest::hmctest(linearmodel)
+```
+
+```{r}
+dwtest(linearmodel)
+lmtest::bgtest(linearmodel)
+```
+
+```{r}
+#correlated variables
+VIF(linearmodel)
+```
+```{r}
+plot(linearmodel)
+```
+
+```{r}
+lmauto=dwtest(linearmodel)
+p=(1-(lmauto$statistic/2))
+```
+
+```{r}
+Y_varlm<-data_covid_IHSG$Close
+X_varlm<-subset(data_covid_IHSG,select=-c(Date,total_boosters,Close))
+```
+
+```{r}
+LMfomIt=Close~.-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality-new_tests
+```
+
+```{r}
+#remove auto
+#iter=1
+Y_varlm<-Y_varlm[2:length(Y_varlm)]-(p*Y_varlm[1:length(Y_varlm)-1])
+X_varlm<-X_varlm[2:nrow(X_varlm),]-(p*X_varlm[1:nrow(X_varlm)-1,])
+data_transformlm=data.frame("Close"=Y_varlm,X_varlm)
+
+lmFitIt<-lm(LMfomIt,data_transformlm)
+lmautoIt=dwtest(lmFitIt)
+p=(1-(lmautoIt$statistic/2))
+lmautoIt
+
+#iter=2
+Y_varlm<-Y_varlm[2:length(Y_varlm)]-(p*Y_varlm[1:length(Y_varlm)-1])
+X_varlm<-X_varlm[2:nrow(X_varlm),]-(p*X_varlm[1:nrow(X_varlm)-1,])
+data_transformlm=data.frame("Close"=Y_varlm,X_varlm)
+
+lmFitIt<-lm(LMfomIt,data_transformlm)
+lmautoIt=dwtest(lmFitIt)
+p=(1-(lmautoIt$statistic/2))
+lmautoIt
+```
+
+```{r}
+summary(lmFitIt)
+sqrt(mean(residuals.lm(lmFitIt)^2))
+```
+```{r}
+LMfomIt=Close~.-positive_rate-tests_per_case-stringency_index-new_vaccinations-cumulative_all_fully_vaccinated-cumulative_all_effectively_vaccinated-infection_fatality-new_tests-new_cases-new_deaths-total_vaccinations
+```
+
+```{r}
+lmFitIt<-lm(LMfomIt,data_transformlm)
+summary(lmFitIt)
+sqrt(mean(residuals.lm(lmFitIt)^2))
+```
+
+```{r}
+#assumption check
+ols_test_normality(lmFitIt)
+
+lmtest::bptest(lmFitIt)
+lmtest::gqtest(lmFitIt)
+lmtest::hmctest(lmFitIt)
+glejser(lmFitIt)
+
+dwtest(lmFitIt)
+```
+```{r}
+VIF(lmFitIt)
+```
+
+```{r}
+plot(lmFitIt)
+```
+
